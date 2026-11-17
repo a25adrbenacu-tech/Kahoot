@@ -13,6 +13,8 @@ public class crearKahoot : MonoBehaviour
         public string[] answers = new string[4];
         public float duration = 15;
     }
+
+    public class preguntasKahoot { }
     private string rutaKahootPrueba1;
     private string rutaimportarkahoots;
     private string nombrearchivo;
@@ -76,13 +78,14 @@ public class crearKahoot : MonoBehaviour
         save.correctAnswer = correct;
 
         questionsontheKahoot.Add(save);
-
+        
     }
 
-    public void safeKahoot()
+    public void saveKahoot()
     {
         nombrearchivo = "kahoot" + contadorKahoots + ".json";
         nombreFinalArchivo = Path.Combine(rutaimportarkahoots, nombrearchivo);
+
 
         while (File.Exists(nombreFinalArchivo))
         {

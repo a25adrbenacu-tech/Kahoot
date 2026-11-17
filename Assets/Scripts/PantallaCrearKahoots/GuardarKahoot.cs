@@ -65,18 +65,24 @@ public class GuardarKahoot : MonoBehaviour
     public void saveQuestion()
     {
         crearKahoot.saveQuestions(question, answer1, answer2 , answer3, answer4, duration, correctAnswer);
-        textopregunta.text ="";   
-        respuesta1.text ="";   
-        respuesta2.text ="";   
-        respuesta3.text ="";   
-        respuesta4.text ="";   
-        duracion.text ="";
-        rescorrecta.value = 0;
+
         
     }
 
-    public void saveKahoot()
+    public void nextQuestion()
     {
+        textopregunta.text = "";
+        respuesta1.text = "";
+        respuesta2.text = "";
+        respuesta3.text = "";
+        respuesta4.text = "";
+        duracion.text = "";
+        rescorrecta.value = 0;
+    }
+
+    public void saveKahootAndExit()
+    {
+        crearKahoot.saveKahoot();
         crearKahoot.revisarCarpetaParaVerJson();
         SceneManager.LoadScene("PantallaTitulo");
     }
