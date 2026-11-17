@@ -10,16 +10,17 @@ public class crearKahoot : MonoBehaviour
     {
         public string question;
         public int correctAnswer;
-        public string[] answers;
-        public int duration = 15;
+        public string[] answers = new string[4];
+        public float duration = 15;
     }
     private string rutaKahootPrueba1;
     private string rutaimportarkahoots;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        /**rutaKahootPrueba1 = Application.persistentDataPath + "/KahootPrueba1.json";
         rutaimportarkahoots = Application.persistentDataPath;
+        /**rutaKahootPrueba1 = Application.persistentDataPath + "/KahootPrueba1.json";
+        
         Debug.Log(rutaKahootPrueba1);
 
         Questions firstQuestionKahootPrueba1 = new Questions();
@@ -44,16 +45,35 @@ public class crearKahoot : MonoBehaviour
 
             importedJson.Add(p);
         }
+        Debug.Log(rutaimportarkahoots);
         
     }
-     private string[] revisarCarpetaParaVerJson()
+     public string[] revisarCarpetaParaVerJson()
     {
         string[] lista = Directory.GetFiles(rutaimportarkahoots, "*.json");
 
         return lista;
     }
 
-    
+    public void saveQuestions(string question, string answer1, string answer2, string answer3, string answer4, float duration, int correct)
+    {
+        Questions save = new Questions();
+
+        save.question = question;
+        save.answers[0] = answer1;
+        save.answers[1] = answer2;
+        save.answers[2] = answer3;
+        save.answers[3] = answer4;
+        save.duration = duration;
+        save.correctAnswer = correct;
+        string json = JsonUtility.ToJson(save);
+        File.WriteAllText(rutaimportarkahoots, json);
+
+
+
+    }
+
+
 
     // Update is called once per frame
     void Update()
