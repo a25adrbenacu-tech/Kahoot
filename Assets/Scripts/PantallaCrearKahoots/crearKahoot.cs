@@ -15,10 +15,15 @@ public class crearKahoot : MonoBehaviour
     }
     private string rutaKahootPrueba1;
     private string rutaimportarkahoots;
+    private string nombrearchivo;
+    private int contadorKahoots;
+    private string nombreFinalArchivo;
+    List<Questions> questionsontheKahoot = new List<Questions>();
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         rutaimportarkahoots = Application.persistentDataPath;
+
         /**rutaKahootPrueba1 = Application.persistentDataPath + "/KahootPrueba1.json";
         
         Debug.Log(rutaKahootPrueba1);
@@ -38,6 +43,7 @@ public class crearKahoot : MonoBehaviour
         Debug.Log(pruebaCnvertirJsonAString.correctAnswer);
         Debug.Log(pruebaCnvertirJsonAString.answers);**/
         List<Questions> importedJson = new List<Questions>();
+        
         foreach (string ruta in revisarCarpetaParaVerJson())
         {
             string texto = File.ReadAllText(ruta);
@@ -59,6 +65,8 @@ public class crearKahoot : MonoBehaviour
     {
         Questions save = new Questions();
 
+        
+
         save.question = question;
         save.answers[0] = answer1;
         save.answers[1] = answer2;
@@ -66,11 +74,24 @@ public class crearKahoot : MonoBehaviour
         save.answers[3] = answer4;
         save.duration = duration;
         save.correctAnswer = correct;
-        string json = JsonUtility.ToJson(save);
-        File.WriteAllText(rutaimportarkahoots, json);
 
+        questionsontheKahoot.Add(save);
 
+    }
 
+    public void safeKahoot()
+    {
+        nombrearchivo = "kahoot" + contadorKahoots + ".json";
+        nombreFinalArchivo = Path.Combine(rutaimportarkahoots, nombrearchivo);
+
+        while (File.Exists(nombreFinalArchivo))
+        {
+            contadorKahoots++;
+            nombrearchivo = "kahoot" + contadorKahoots + ".json";
+            nombreFinalArchivo = Path.Combine(rutaimportarkahoots, nombrearchivo);
+        }
+        string json = JsonUtility.ToJson(questionsontheKahoot);
+        File.WriteAllText(nombreFinalArchivo, json);
     }
 
 
