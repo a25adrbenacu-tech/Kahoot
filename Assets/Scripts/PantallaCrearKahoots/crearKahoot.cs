@@ -14,13 +14,17 @@ public class crearKahoot : MonoBehaviour
         public float duration = 15;
     }
 
-    public class preguntasKahoot { }
+    public class preguntasKahoot
+    {
+        public string nombre;
+        public List<Questions> questions = new List<Questions>();
+    }
     private string rutaKahootPrueba1;
     private string rutaimportarkahoots;
     private string nombrearchivo;
     private int contadorKahoots;
     private string nombreFinalArchivo;
-    List<Questions> questionsontheKahoot = new List<Questions>();
+    preguntasKahoot kahootActual = new preguntasKahoot();
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -77,8 +81,7 @@ public class crearKahoot : MonoBehaviour
         save.duration = duration;
         save.correctAnswer = correct;
 
-        questionsontheKahoot.Add(save);
-        
+        kahootActual.questions.Add(save);
     }
 
     public void saveKahoot()
@@ -93,7 +96,7 @@ public class crearKahoot : MonoBehaviour
             nombrearchivo = "kahoot" + contadorKahoots + ".json";
             nombreFinalArchivo = Path.Combine(rutaimportarkahoots, nombrearchivo);
         }
-        string json = JsonUtility.ToJson(questionsontheKahoot);
+        string json = JsonUtility.ToJson(kahootActual, true);
         File.WriteAllText(nombreFinalArchivo, json);
     }
 
