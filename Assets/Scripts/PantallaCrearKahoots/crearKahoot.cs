@@ -11,9 +11,10 @@ public class crearKahoot : MonoBehaviour
         public string question;
         public int correctAnswer;
         public string[] answers = new string[4];
-        public float duration = 15;
+        public float duration;
     }
 
+    [System.Serializable]
     public class preguntasKahoot
     {
         public string nombre;
