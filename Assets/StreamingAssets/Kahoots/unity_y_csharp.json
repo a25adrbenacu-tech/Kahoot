@@ -1,0 +1,93 @@
+{
+    "nombre": "Unity y C#",
+    "questions": [
+        {
+            "question": "¿Qué método de MonoBehaviour se ejecuta una vez por frame?",
+            "correctAnswer": 2,
+            "answers": [
+                "Start",
+                "Awake",
+                "Update",
+                "OnEnable"
+            ],
+            "duration": 20
+        },
+        {
+            "question": "¿Qué propiedad da una carpeta escribible en cualquier plataforma?",
+            "correctAnswer": 1,
+            "answers": [
+                "Application.dataPath",
+                "Application.persistentDataPath",
+                "Application.streamingAssetsPath",
+                "Environment.CurrentDirectory"
+            ],
+            "duration": 25
+        },
+        {
+            "question": "¿Qué clase de Unity convierte objetos a JSON?",
+            "correctAnswer": 0,
+            "answers": [
+                "JsonUtility",
+                "XmlSerializer",
+                "BinaryFormatter",
+                "PlayerPrefs"
+            ],
+            "duration": 20
+        },
+        {
+            "question": "¿Qué componente ordena hijos en columna automáticamente?",
+            "correctAnswer": 2,
+            "answers": [
+                "Grid Layout Group",
+                "Horizontal Layout Group",
+                "Vertical Layout Group",
+                "Content Size Fitter"
+            ],
+            "duration": 20
+        },
+        {
+            "question": "¿Qué excepción lanza File.ReadAllText si el archivo no existe?",
+            "correctAnswer": 1,
+            "answers": [
+                "NullReferenceException",
+                "FileNotFoundException",
+                "FormatException",
+                "IndexOutOfRangeException"
+            ],
+            "duration": 25
+        },
+        {
+            "question": "¿Qué componente hace que el Content crezca con sus hijos?",
+            "correctAnswer": 0,
+            "answers": [
+                "Content Size Fitter",
+                "Mask",
+                "Scroll Rect",
+                "Aspect Ratio Fitter"
+            ],
+            "duration": 20
+        },
+        {
+            "question": "¿Con qué clase cargas otra escena?",
+            "correctAnswer": 0,
+            "answers": [
+                "SceneManager",
+                "GameManager",
+                "EditorSceneManager",
+                ""
+            ],
+            "duration": 15
+        },
+        {
+            "question": "En C#, ¿qué palabra captura una excepción?",
+            "correctAnswer": 1,
+            "answers": [
+                "throw",
+                "catch",
+                "finally",
+                "try"
+            ],
+            "duration": 15
+        }
+    ]
+}

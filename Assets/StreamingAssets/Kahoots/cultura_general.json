@@ -1,0 +1,93 @@
+{
+    "nombre": "Cultura general",
+    "questions": [
+        {
+            "question": "¿Cuál es la capital de Australia?",
+            "correctAnswer": 1,
+            "answers": [
+                "Sídney",
+                "Canberra",
+                "Melbourne",
+                "Perth"
+            ],
+            "duration": 20
+        },
+        {
+            "question": "¿Cuántos continentes hay según el modelo más común?",
+            "correctAnswer": 2,
+            "answers": [
+                "5",
+                "6",
+                "7",
+                "8"
+            ],
+            "duration": 15
+        },
+        {
+            "question": "¿Quién pintó 'La persistencia de la memoria'?",
+            "correctAnswer": 2,
+            "answers": [
+                "Picasso",
+                "Miró",
+                "Dalí",
+                "Velázquez"
+            ],
+            "duration": 20
+        },
+        {
+            "question": "¿Cuál es el planeta más grande del sistema solar?",
+            "correctAnswer": 1,
+            "answers": [
+                "Saturno",
+                "Júpiter",
+                "Neptuno",
+                "Tierra"
+            ],
+            "duration": 15
+        },
+        {
+            "question": "¿En qué año llegó el ser humano a la Luna?",
+            "correctAnswer": 1,
+            "answers": [
+                "1965",
+                "1969",
+                "1972",
+                "1959"
+            ],
+            "duration": 20
+        },
+        {
+            "question": "¿Cuál es el río más largo de la península ibérica?",
+            "correctAnswer": 2,
+            "answers": [
+                "Ebro",
+                "Duero",
+                "Tajo",
+                "Guadalquivir"
+            ],
+            "duration": 20
+        },
+        {
+            "question": "¿Símbolo químico del oro?",
+            "correctAnswer": 0,
+            "answers": [
+                "Au",
+                "Ag",
+                "Or",
+                ""
+            ],
+            "duration": 10
+        },
+        {
+            "question": "¿Cuántos lados tiene un hexágono?",
+            "correctAnswer": 1,
+            "answers": [
+                "5",
+                "6",
+                "7",
+                "8"
+            ],
+            "duration": 10
+        }
+    ]
+}

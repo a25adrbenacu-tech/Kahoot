@@ -1,71 +1,63 @@
-using System.IO;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.SceneManagement;
+using System.Collections.Generic;
 using TMPro;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 
-// Guarda el kahoot elegido para que lo lea la escena de juego
-public static class KahootSeleccionado
-{
-    public static string ruta;
-    public static crearKahoot.preguntasKahoot datos;
-}
-
+// Escena SelectorKahoot: lista dinámica de los .json de persistentDataPath/Kahoots + nombre de usuario.
 public class ListaKahoots : MonoBehaviour
 {
-    [SerializeField] private Transform contenido;     // objeto "Contenido" del ScrollReckt
-    [SerializeField] private Button prefabBoton;       // prefab: UI > Button - TextMeshPro
-    [SerializeField] private string escenaJuego = "";  // escena a cargar al pulsar (vacío = solo Debug.Log)
+    [SerializeField] private Transform contenido;          // Content del ScrollView
+    [SerializeField] private ItemKahoot prefabItem;
+    [SerializeField] private TMP_InputField inputUsuario;
+    [SerializeField] private TMP_Text textoAviso;
+    [SerializeField] private TMP_Text textoVacio;
+    [SerializeField] private TMP_Text textoRuta;
+
+    private static readonly Color ColorError = new Color(1f, 0.45f, 0.5f);
+    private static readonly Color ColorInfo = new Color(1f, 1f, 1f, 0.8f);
 
     void Start()
     {
+        inputUsuario.characterLimit = 20;
+        inputUsuario.text = Sesion.Usuario;
+        inputUsuario.onValueChanged.AddListener(_ => MostrarAviso("", ColorInfo));
+        if (textoRuta != null) textoRuta.text = "Folder: " + Rutas.CarpetaKahoots;
         CargarLista();
     }
 
     public void CargarLista()
     {
-        // Borra lo que haya (los textos de prueba o una lista anterior)
         foreach (Transform hijo in contenido)
-            Destroy(hijo.gameObject);
+            { hijo.gameObject.SetActive(false); Destroy(hijo.gameObject); }
 
-        string[] archivos = Directory.GetFiles(Application.persistentDataPath, "*.json");
-
-        foreach (string ruta in archivos)
+        List<KahootInfo> kahoots = KahootRepository.CargarTodos();
+        foreach (KahootInfo k in kahoots)
         {
-            crearKahoot.preguntasKahoot kahoot;
-            try
-            {
-                kahoot = JsonUtility.FromJson<crearKahoot.preguntasKahoot>(File.ReadAllText(ruta));
-            }
-            catch
-            {
-                Debug.LogWarning("JSON no válido, se ignora: " + ruta);
-                continue;
-            }
-            if (kahoot == null || kahoot.questions == null || kahoot.questions.Count == 0)
-                continue; // no es un kahoot (p.ej. KahootPrueba1.json antiguo)
-
-            string nombre = string.IsNullOrEmpty(kahoot.nombre)
-                ? Path.GetFileNameWithoutExtension(ruta)
-                : kahoot.nombre;
-
-            Button boton = Instantiate(prefabBoton, contenido);
-            boton.name = "Boton_" + nombre;
-            boton.GetComponentInChildren<TMP_Text>().text = nombre + "  (" + kahoot.questions.Count + " preguntas)";
-
-            string rutaBoton = ruta;
-            crearKahoot.preguntasKahoot datosBoton = kahoot;
-            boton.onClick.AddListener(() => Seleccionar(rutaBoton, datosBoton));
+            ItemKahoot item = Instantiate(prefabItem, contenido);
+            item.name = "Item_" + k.id;
+            item.Configurar(k, "Play", Seleccionar);
         }
+        textoVacio.gameObject.SetActive(kahoots.Count == 0);
     }
 
-    private void Seleccionar(string ruta, crearKahoot.preguntasKahoot datos)
+    private void Seleccionar(KahootInfo kahoot)
     {
-        KahootSeleccionado.ruta = ruta;
-        KahootSeleccionado.datos = datos;
-        Debug.Log("Kahoot elegido: " + ruta);
+        string usuario = inputUsuario.text.Trim();
+        if (usuario.Length == 0)
+        {
+            MostrarAviso("Write your username before playing", ColorError);
+            inputUsuario.Select();
+            return;
+        }
 
-        if (!string.IsNullOrEmpty(escenaJuego))
-            SceneManager.LoadScene(escenaJuego);
+        Sesion.Usuario = usuario;
+        Sesion.KahootSeleccionado = kahoot;
+        SceneManager.LoadScene(Escenas.Juego);
+    }
+
+    private void MostrarAviso(string texto, Color color)
+    {
+        textoAviso.text = texto;
+        textoAviso.color = color;
     }
 }

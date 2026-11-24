@@ -1,111 +1,129 @@
+using System.Collections;
 using System.Collections.Generic;
-using System.IO;
+using TMPro;
 using UnityEngine;
-using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
+// Escena CreacionKahoot: número variable de preguntas, cada una con enunciado, 4 respuestas,
+// respuesta correcta y duración. Al guardar se escribe el .json en la carpeta de lectura dinámica.
 public class crearKahoot : MonoBehaviour
 {
-    [System.Serializable]
-    public class Questions
-    {
-        public string question;
-        public int correctAnswer;
-        public string[] answers = new string[4];
-        public float duration;
-    }
+    [SerializeField] private TMP_InputField inputNombre;
+    [SerializeField] private Transform contenido;            // Content del ScrollView
+    [SerializeField] private ItemPreguntaCreador prefabPregunta;
+    [SerializeField] private ScrollRect scroll;
+    [SerializeField] private TMP_Text textoFeedback;
+    [SerializeField] private TMP_Text textoContador;
+    [SerializeField] private Button botonGuardar;
 
-    [System.Serializable]
-    public class preguntasKahoot
-    {
-        public string nombre;
-        public List<Questions> questions = new List<Questions>();
-    }
-    private string rutaKahootPrueba1;
-    private string rutaimportarkahoots;
-    private string nombrearchivo;
-    private int contadorKahoots;
-    private string nombreFinalArchivo;
-    preguntasKahoot kahootActual = new preguntasKahoot();
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    private readonly List<ItemPreguntaCreador> preguntas = new List<ItemPreguntaCreador>();
+
+    private static readonly Color ColorError = new Color(1f, 0.45f, 0.5f);
+    private static readonly Color ColorOk = new Color(0.45f, 1f, 0.5f);
+
     void Start()
     {
-        rutaimportarkahoots = Application.persistentDataPath;
+        foreach (Transform hijo in contenido)
+            { hijo.gameObject.SetActive(false); Destroy(hijo.gameObject); }
 
-        /**rutaKahootPrueba1 = Application.persistentDataPath + "/KahootPrueba1.json";
-        
-        Debug.Log(rutaKahootPrueba1);
+        inputNombre.characterLimit = 40;
+        inputNombre.onValueChanged.AddListener(_ => Feedback("", Color.white));
+        AnadirPregunta();
+        Feedback("", Color.white);
+    }
 
-        Questions firstQuestionKahootPrueba1 = new Questions();
-        firstQuestionKahootPrueba1.question = "alo";
-        firstQuestionKahootPrueba1.answers = new string[] { "elo", "pelo", "qwefwe", "nose" };
-        firstQuestionKahootPrueba1.correctAnswer = 1;
+    public void AnadirPregunta()
+    {
+        ItemPreguntaCreador item = Instantiate(prefabPregunta, contenido);
+        item.Inicializar(BorrarPregunta);
+        preguntas.Add(item);
+        Renumerar();
+        StartCoroutine(ScrollAl(0f)); // baja hasta la nueva pregunta
+    }
 
-        string Json = JsonUtility.ToJson(firstQuestionKahootPrueba1, true);
-        File.WriteAllText(rutaKahootPrueba1, Json);
-        Debug.Log(rutaKahootPrueba1);
+    private void BorrarPregunta(ItemPreguntaCreador item)
+    {
+        if (preguntas.Count <= 1) return;
+        preguntas.Remove(item);
+        item.gameObject.SetActive(false);
+        Destroy(item.gameObject);
+        Renumerar();
+    }
 
-        string conversion = File.ReadAllText(rutaKahootPrueba1);
-        Questions pruebaCnvertirJsonAString = JsonUtility.FromJson<Questions>(conversion);
-        Debug.Log(pruebaCnvertirJsonAString.question);
-        Debug.Log(pruebaCnvertirJsonAString.correctAnswer);
-        Debug.Log(pruebaCnvertirJsonAString.answers);**/
-        List<Questions> importedJson = new List<Questions>();
-        
-        foreach (string ruta in revisarCarpetaParaVerJson())
+    private void Renumerar()
+    {
+        for (int i = 0; i < preguntas.Count; i++)
         {
-            string texto = File.ReadAllText(ruta);
-            Questions p = JsonUtility.FromJson<Questions>(texto);
-
-            importedJson.Add(p);
+            preguntas[i].SetNumero(i + 1);
+            preguntas[i].SetBorrable(preguntas.Count > 1);
         }
-        Debug.Log(rutaimportarkahoots);
-        
-    }
-     public string[] revisarCarpetaParaVerJson()
-    {
-        string[] lista = Directory.GetFiles(rutaimportarkahoots, "*.json");
-
-        return lista;
+        textoContador.text = preguntas.Count + (preguntas.Count == 1 ? " question" : " questions");
     }
 
-    public void saveQuestions(string question, string answer1, string answer2, string answer3, string answer4, float duration, int correct)
+    public void Guardar()
     {
-        Questions save = new Questions();
-
-        
-
-        save.question = question;
-        save.answers[0] = answer1;
-        save.answers[1] = answer2;
-        save.answers[2] = answer3;
-        save.answers[3] = answer4;
-        save.duration = duration;
-        save.correctAnswer = correct;
-
-        kahootActual.questions.Add(save);
-    }
-
-    public void saveKahoot()
-    {
-        nombrearchivo = "kahoot" + contadorKahoots + ".json";
-        nombreFinalArchivo = Path.Combine(rutaimportarkahoots, nombrearchivo);
-
-
-        while (File.Exists(nombreFinalArchivo))
+        var kahoot = new Kahoot { nombre = inputNombre.text.Trim() };
+        var duracionesValidas = new bool[preguntas.Count];
+        for (int i = 0; i < preguntas.Count; i++)
         {
-            contadorKahoots++;
-            nombrearchivo = "kahoot" + contadorKahoots + ".json";
-            nombreFinalArchivo = Path.Combine(rutaimportarkahoots, nombrearchivo);
+            preguntas[i].MarcarError(false);
+            kahoot.questions.Add(preguntas[i].Leer(out duracionesValidas[i]));
         }
-        string json = JsonUtility.ToJson(kahootActual, true);
-        File.WriteAllText(nombreFinalArchivo, json);
+
+        string error = GuardarKahoot.Validar(kahoot, duracionesValidas, out int indiceError);
+        if (error != null)
+        {
+            Feedback(error, ColorError);
+            if (indiceError >= 0)
+            {
+                preguntas[indiceError].MarcarError(true);
+                StartCoroutine(ScrollA(indiceError));
+            }
+            else if (string.IsNullOrWhiteSpace(kahoot.nombre))
+            {
+                inputNombre.Select();
+            }
+            return;
+        }
+
+        try
+        {
+            string ruta = KahootRepository.Guardar(kahoot);
+            Feedback("Saved: " + System.IO.Path.GetFileName(ruta), ColorOk);
+            botonGuardar.interactable = false;
+            StartCoroutine(IrAlSelector());
+        }
+        catch (System.Exception e)
+        {
+            Feedback("Could not save the kahoot: " + e.Message, ColorError);
+        }
     }
 
-
-
-    // Update is called once per frame
-    void Update()
+    private IEnumerator IrAlSelector()
     {
-        
+        yield return new WaitForSeconds(1.2f);
+        SceneManager.LoadScene(Escenas.Selector); // el kahoot nuevo ya aparece en la lista
+    }
+
+    private IEnumerator ScrollAl(float posicion)
+    {
+        yield return null;
+        Canvas.ForceUpdateCanvases();
+        scroll.verticalNormalizedPosition = posicion;
+    }
+
+    private IEnumerator ScrollA(int indice)
+    {
+        yield return null;
+        Canvas.ForceUpdateCanvases();
+        float t = preguntas.Count <= 1 ? 1f : 1f - (float)indice / (preguntas.Count - 1);
+        scroll.verticalNormalizedPosition = t;
+    }
+
+    private void Feedback(string texto, Color color)
+    {
+        textoFeedback.text = texto;
+        textoFeedback.color = color;
     }
 }
