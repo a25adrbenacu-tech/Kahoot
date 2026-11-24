@@ -1,20 +1,41 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-// Menú principal: navegación a Quizzes, Leaderboards, Creador y About.
 public class BotontesTitulo : MonoBehaviour
 {
-    public void Jugar() => SceneManager.LoadScene(Escenas.Selector);
-    public void VerLeaderboards() => SceneManager.LoadScene(Escenas.Leaderboards);
-    public void cambiarEscenaCreacionKahoot() => SceneManager.LoadScene(Escenas.Creador);
-    public void VerAbout() => SceneManager.LoadScene(Escenas.About);
+    void Start()
+    {
+        
+    }
+
+    void Update()
+    {
+        
+    }
+
+    public void Jugar()
+    {
+        SceneManager.LoadScene("SelectorKahoot");
+    }
+
+    public void VerLeaderboards()
+    {
+        SceneManager.LoadScene("Leaderboards");
+    }
+
+    public void cambiarEscenaCreacionKahoot()
+    {
+        SceneManager.LoadScene("CreacionKahoot");
+    }
+
+    public void VerAbout()
+    {
+        SceneManager.LoadScene("About");
+    }
 
     public void Salir()
     {
-#if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-#else
+        Debug.Log("Salir del juego");
         Application.Quit();
-#endif
     }
 }

@@ -620,13 +620,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "<b><size=56>Kahoot! \u2013 Projecte II</size></b>\n\nQuiz game inspired
-    by Kahoot made with Unity.\n\n\u2022 Kahoots are read from <b>.json</b> files
-    in the persistent data folder (Kahoots).\n\u2022 Each kahoot has its own <b>.xml</b>
-    leaderboard (Leaderboards folder).\n\u2022 Points: up to 1000 per question, the
-    faster you answer the more you get.\n\u2022 Create your own kahoots with as many
-    questions as you want.\n\n<b>Author:</b> ____________\n<b>Course:</b> Acc\xE9s
-    a dades \u2013 Projecte II"
+  m_text: "<b><size=56>Kahoot - Projecte II</size></b>\n\nKahoot made with Unity.\n\n- Kahoots are loaded from .json files in the Kahoots folder.\n- Every kahoot saves its scores in its own .xml file.\n- The faster you answer, the more points you get (max 1000).\n- You can create your own kahoots with as many questions as you want.\n\n<b>Author:</b> Adrian Benitez"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

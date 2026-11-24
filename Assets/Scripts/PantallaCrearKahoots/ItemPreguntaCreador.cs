@@ -1,39 +1,39 @@
-using System;
-using System.Globalization;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-// Tarjeta de una pregunta en el creador (prefab ItemPreguntaCreador).
 public class ItemPreguntaCreador : MonoBehaviour
 {
     [SerializeField] private TMP_Text textoTitulo;
     [SerializeField] private TMP_InputField inputPregunta;
-    [SerializeField] private TMP_InputField[] inputRespuestas = new TMP_InputField[Pregunta.NumRespuestas];
+    [SerializeField] private TMP_InputField[] inputRespuestas = new TMP_InputField[4];
     [SerializeField] private TMP_Dropdown dropdownCorrecta;
     [SerializeField] private TMP_InputField inputDuracion;
     [SerializeField] private Button botonBorrar;
     [SerializeField] private Image fondo;
 
     private Color colorNormal;
-    private static readonly Color ColorError = new Color(0.55f, 0.08f, 0.15f, 1f);
 
-    public void Inicializar(Action<ItemPreguntaCreador> alBorrar)
+    public void Inicializar(System.Action<ItemPreguntaCreador> alBorrar)
     {
         colorNormal = fondo.color;
+
         botonBorrar.onClick.RemoveAllListeners();
         botonBorrar.onClick.AddListener(() => alBorrar(this));
 
         inputPregunta.characterLimit = 120;
-        foreach (TMP_InputField r in inputRespuestas) r.characterLimit = 75;
+        inputPregunta.onValueChanged.AddListener(quitarError);
+
+        for (int i = 0; i < inputRespuestas.Length; i++)
+        {
+            inputRespuestas[i].characterLimit = 75;
+            inputRespuestas[i].onValueChanged.AddListener(quitarError);
+        }
+
         inputDuracion.contentType = TMP_InputField.ContentType.DecimalNumber;
         inputDuracion.characterLimit = 5;
-
-        // Al editar se quita la marca de error.
-        inputPregunta.onValueChanged.AddListener(_ => MarcarError(false));
-        foreach (TMP_InputField r in inputRespuestas) r.onValueChanged.AddListener(_ => MarcarError(false));
-        dropdownCorrecta.onValueChanged.AddListener(_ => MarcarError(false));
-        inputDuracion.onValueChanged.AddListener(_ => MarcarError(false));
+        inputDuracion.onValueChanged.AddListener(quitarError);
+        dropdownCorrecta.onValueChanged.AddListener(quitarErrorDropdown);
     }
 
     public void SetNumero(int numero)
@@ -48,32 +48,42 @@ public class ItemPreguntaCreador : MonoBehaviour
 
     public void MarcarError(bool error)
     {
-        fondo.color = error ? ColorError : colorNormal;
+        if (error)
+            fondo.color = new Color(0.55f, 0.08f, 0.15f);
+        else
+            fondo.color = colorNormal;
     }
 
-    // Devuelve los datos tal cual están escritos (la validación la hace GuardarKahoot).
-    public Pregunta Leer(out bool duracionValida)
+    public crearKahoot.Questions leerPregunta(out bool duracionBien)
     {
-        var p = new Pregunta
-        {
-            question = inputPregunta.text.Trim(),
-            correctAnswer = dropdownCorrecta.value,
-            answers = new string[Pregunta.NumRespuestas]
-        };
-        for (int i = 0; i < Pregunta.NumRespuestas; i++)
-            p.answers[i] = inputRespuestas[i].text.Trim();
+        crearKahoot.Questions pregunta = new crearKahoot.Questions();
+        pregunta.question = inputPregunta.text.Trim();
+        pregunta.correctAnswer = dropdownCorrecta.value;
 
-        string d = inputDuracion.text.Trim().Replace(',', '.');
-        if (d.Length == 0)
+        for (int i = 0; i < 4; i++)
+            pregunta.answers[i] = inputRespuestas[i].text.Trim();
+
+        string duracion = inputDuracion.text.Trim().Replace(',', '.');
+        if (duracion == "")
         {
-            p.duration = Pregunta.DuracionPorDefecto;
-            duracionValida = true;
+            pregunta.duration = 20;
+            duracionBien = true;
         }
         else
         {
-            duracionValida = float.TryParse(d, NumberStyles.Float, CultureInfo.InvariantCulture, out float valor);
-            p.duration = valor;
+            duracionBien = float.TryParse(duracion, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out pregunta.duration);
         }
-        return p;
+
+        return pregunta;
+    }
+
+    private void quitarError(string texto)
+    {
+        MarcarError(false);
+    }
+
+    private void quitarErrorDropdown(int valor)
+    {
+        MarcarError(false);
     }
 }

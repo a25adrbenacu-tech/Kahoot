@@ -2,7 +2,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-// Escena Resultados: resumen de la partida + posición en la leaderboard de ese kahoot.
 public class PantallaResultados : MonoBehaviour
 {
     [SerializeField] private TMP_Text textoKahoot;
@@ -15,25 +14,27 @@ public class PantallaResultados : MonoBehaviour
 
     void Start()
     {
-        KahootInfo kahoot = Sesion.KahootSeleccionado;
-        EntradaLeaderboard e = Sesion.UltimaEntrada;
-        if (kahoot == null || e == null)
+        if (KahootSeleccionado.kahoot == null || KahootSeleccionado.ultimaPartida == null)
         {
-            SceneManager.LoadScene(Escenas.Titulo);
+            SceneManager.LoadScene("PantallaTitulo");
             return;
         }
 
-        Leaderboard lb = LeaderboardRepository.Cargar(kahoot.id);
+        EntradaLeaderboard partida = KahootSeleccionado.ultimaPartida;
+        Leaderboard leaderboard = Leaderboard.cargar(KahootSeleccionado.kahoot.id);
 
-        textoKahoot.text = kahoot.Nombre;
-        textoJugador.text = e.jugador;
-        textoPuntuacion.text = e.puntuacion + " pts";
-        textoAciertos.text = "Correct answers: " + e.aciertos + " / " + e.totalPreguntas;
-        textoTiempo.text = "Time: " + e.tiempo.ToString("0.0") + " s";
-        textoPosicion.text = "Position #" + Sesion.UltimaPosicion + " of " + Mathf.Max(lb.entradas.Count, 1);
+        textoKahoot.text = KahootSeleccionado.kahoot.datos.nombre;
+        textoJugador.text = partida.jugador;
+        textoPuntuacion.text = partida.puntuacion + " pts";
+        textoAciertos.text = "Correct answers: " + partida.aciertos + " / " + partida.totalPreguntas;
+        textoTiempo.text = "Time: " + partida.tiempo.ToString("0.0") + " s";
+        textoPosicion.text = "Position #" + KahootSeleccionado.posicion + " of " + leaderboard.entradas.Count;
 
-        vistaLeaderboard.Mostrar(lb, e.id);
+        vistaLeaderboard.Mostrar(leaderboard, partida.id);
     }
 
-    public void JugarOtraVez() => SceneManager.LoadScene(Escenas.Juego);
+    public void JugarOtraVez()
+    {
+        SceneManager.LoadScene("Juego");
+    }
 }

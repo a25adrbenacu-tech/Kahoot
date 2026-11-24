@@ -1,9 +1,7 @@
-using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-// Botón de respuesta del juego con el estilo de Kahoot (color + forma).
 public class BotonRespuesta : MonoBehaviour
 {
     [SerializeField] private Button boton;
@@ -13,24 +11,33 @@ public class BotonRespuesta : MonoBehaviour
     [SerializeField] private Sprite spriteCorrecto;
     [SerializeField] private Sprite spriteIncorrecto;
 
-    public int Indice { get; private set; }
-    public bool Visible { get; private set; }
+    private int numero;
+    private bool visible;
 
-    public void Inicializar(int indice, Action<int> alPulsar)
+    public void Inicializar(int numeroRespuesta, System.Action<int> alPulsar)
     {
-        Indice = indice;
+        numero = numeroRespuesta;
         boton.onClick.RemoveAllListeners();
-        boton.onClick.AddListener(() => alPulsar(Indice));
+        boton.onClick.AddListener(() => alPulsar(numero));
     }
 
-    // Las respuestas vacías no se muestran, pero el hueco se mantiene (como en Kahoot).
     public void Configurar(string respuesta)
     {
-        Visible = !string.IsNullOrWhiteSpace(respuesta);
-        texto.text = Visible ? respuesta : "";
-        grupo.alpha = Visible ? 1f : 0f;
-        grupo.blocksRaycasts = Visible;
-        boton.interactable = Visible;
+        visible = respuesta != null && respuesta.Trim() != "";
+
+        if (visible)
+        {
+            texto.text = respuesta;
+            grupo.alpha = 1f;
+        }
+        else
+        {
+            texto.text = "";
+            grupo.alpha = 0f;
+        }
+
+        grupo.blocksRaycasts = visible;
+        boton.interactable = visible;
         iconoResultado.gameObject.SetActive(false);
         transform.localScale = Vector3.one;
     }
@@ -40,9 +47,11 @@ public class BotonRespuesta : MonoBehaviour
         boton.interactable = false;
     }
 
-    public void MostrarResultado(bool esCorrecta, bool fueElegida)
+    public void MostrarResultado(bool esCorrecta, bool laHeElegido)
     {
-        if (!Visible) return;
+        if (!visible)
+            return;
+
         boton.interactable = false;
 
         if (esCorrecta)
@@ -50,13 +59,17 @@ public class BotonRespuesta : MonoBehaviour
             grupo.alpha = 1f;
             iconoResultado.sprite = spriteCorrecto;
             iconoResultado.gameObject.SetActive(true);
-            transform.localScale = Vector3.one * 1.03f;
+            transform.localScale = new Vector3(1.03f, 1.03f, 1f);
         }
         else
         {
-            grupo.alpha = fueElegida ? 0.75f : 0.3f;
+            if (laHeElegido)
+                grupo.alpha = 0.75f;
+            else
+                grupo.alpha = 0.3f;
+
             iconoResultado.sprite = spriteIncorrecto;
-            iconoResultado.gameObject.SetActive(fueElegida);
+            iconoResultado.gameObject.SetActive(laHeElegido);
         }
     }
 }

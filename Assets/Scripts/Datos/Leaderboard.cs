@@ -1,20 +1,21 @@
-using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Xml.Serialization;
+using UnityEngine;
 
-[Serializable]
+[System.Serializable]
 public class EntradaLeaderboard
 {
-    public string id = Guid.NewGuid().ToString("N");
+    public string id;
     public string jugador;
     public int puntuacion;
     public int aciertos;
     public int totalPreguntas;
-    public float tiempo;      // segundos totales empleados en responder
-    public string fecha;      // yyyy-MM-dd HH:mm
+    public float tiempo;
+    public string fecha;
 }
 
-[Serializable]
+[System.Serializable]
 [XmlRoot("Leaderboard")]
 public class Leaderboard
 {
@@ -24,13 +25,77 @@ public class Leaderboard
     [XmlArrayItem("Entrada")]
     public List<EntradaLeaderboard> entradas = new List<EntradaLeaderboard>();
 
-    // Mayor puntuación primero; a igualdad, menos tiempo.
-    public void Ordenar()
+    public static string rutaXml(string idKahoot)
     {
-        entradas.Sort((a, b) =>
+        return Path.Combine(Application.persistentDataPath, "Leaderboards", idKahoot + ".xml");
+    }
+
+    public static Leaderboard cargar(string idKahoot)
+    {
+        string ruta = rutaXml(idKahoot);
+        Leaderboard leaderboard = null;
+
+        if (File.Exists(ruta))
         {
-            int c = b.puntuacion.CompareTo(a.puntuacion);
-            return c != 0 ? c : a.tiempo.CompareTo(b.tiempo);
-        });
+            try
+            {
+                XmlSerializer xml = new XmlSerializer(typeof(Leaderboard));
+                using (FileStream archivo = File.OpenRead(ruta))
+                {
+                    leaderboard = (Leaderboard)xml.Deserialize(archivo);
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning("No se ha podido leer " + ruta + ": " + e.Message);
+            }
+        }
+
+        if (leaderboard == null)
+        {
+            leaderboard = new Leaderboard();
+            leaderboard.kahoot = idKahoot;
+        }
+        if (leaderboard.entradas == null)
+            leaderboard.entradas = new List<EntradaLeaderboard>();
+
+        leaderboard.ordenar();
+        return leaderboard;
+    }
+
+    public static int guardarPartida(string idKahoot, EntradaLeaderboard entrada)
+    {
+        Leaderboard leaderboard = cargar(idKahoot);
+        leaderboard.entradas.Add(entrada);
+        leaderboard.ordenar();
+
+        try
+        {
+            Directory.CreateDirectory(Path.Combine(Application.persistentDataPath, "Leaderboards"));
+            XmlSerializer xml = new XmlSerializer(typeof(Leaderboard));
+            using (FileStream archivo = File.Create(rutaXml(idKahoot)))
+            {
+                xml.Serialize(archivo, leaderboard);
+            }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogWarning("No se ha podido guardar la leaderboard: " + e.Message);
+        }
+
+        return leaderboard.entradas.IndexOf(entrada) + 1;
+    }
+
+    public void ordenar()
+    {
+        entradas.Sort(compararEntradas);
+    }
+
+    private static int compararEntradas(EntradaLeaderboard a, EntradaLeaderboard b)
+    {
+        if (a.puntuacion != b.puntuacion)
+            return b.puntuacion.CompareTo(a.puntuacion);
+
+        return a.tiempo.CompareTo(b.tiempo);
     }
 }

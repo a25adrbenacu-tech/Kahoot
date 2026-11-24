@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-// Escena Leaderboards: ver la leaderboard (XML independiente) de cualquier kahoot sin jugar.
 public class PantallaLeaderboards : MonoBehaviour
 {
     [SerializeField] private Transform contenidoKahoots;
@@ -11,47 +10,52 @@ public class PantallaLeaderboards : MonoBehaviour
     [SerializeField] private TMP_Text textoSinKahoots;
     [SerializeField] private VistaLeaderboard vistaLeaderboard;
 
-    private readonly List<ItemKahoot> items = new List<ItemKahoot>();
+    private List<ItemKahoot> items = new List<ItemKahoot>();
 
     void Start()
     {
-        List<KahootInfo> kahoots = KahootRepository.CargarTodos();
+        foreach (Transform hijo in contenidoKahoots)
+        {
+            hijo.gameObject.SetActive(false);
+            Destroy(hijo.gameObject);
+        }
+
+        List<KahootCargado> kahoots = ListaKahoots.leerKahoots();
         textoSinKahoots.gameObject.SetActive(kahoots.Count == 0);
 
-        foreach (Transform hijo in contenidoKahoots)
-            { hijo.gameObject.SetActive(false); Destroy(hijo.gameObject); }
-
-        foreach (KahootInfo k in kahoots)
+        foreach (KahootCargado kahoot in kahoots)
         {
             ItemKahoot item = Instantiate(prefabItem, contenidoKahoots);
-            item.name = "Item_" + k.id;
-            item.Configurar(k, "View", Mostrar);
+            item.name = "Item_" + kahoot.id;
+            item.Configurar(kahoot, "View", mostrar);
             items.Add(item);
         }
 
-        if (kahoots.Count > 0)
-        {
-            KahootInfo inicial = kahoots[0];
-            if (Sesion.KahootSeleccionado != null)
-            {
-                KahootInfo previo = kahoots.Find(k => k.id == Sesion.KahootSeleccionado.id);
-                if (previo != null) inicial = previo;
-            }
-            Mostrar(inicial);
-        }
-        else
+        if (kahoots.Count == 0)
         {
             textoTituloKahoot.text = "No kahoots available";
-            vistaLeaderboard.Mostrar(null);
+            vistaLeaderboard.Mostrar(null, null);
+            return;
         }
+
+        KahootCargado primero = kahoots[0];
+        if (KahootSeleccionado.kahoot != null)
+        {
+            foreach (KahootCargado kahoot in kahoots)
+            {
+                if (kahoot.id == KahootSeleccionado.kahoot.id)
+                    primero = kahoot;
+            }
+        }
+        mostrar(primero);
     }
 
-    private void Mostrar(KahootInfo kahoot)
+    private void mostrar(KahootCargado kahoot)
     {
-        textoTituloKahoot.text = kahoot.Nombre;
-        vistaLeaderboard.Mostrar(LeaderboardRepository.Cargar(kahoot.id));
+        textoTituloKahoot.text = kahoot.datos.nombre;
+        vistaLeaderboard.Mostrar(Leaderboard.cargar(kahoot.id), null);
 
-        for (int i = 0; i < items.Count; i++)
-            items[i].Resaltar(items[i].name == "Item_" + kahoot.id);
+        foreach (ItemKahoot item in items)
+            item.Resaltar(item.name == "Item_" + kahoot.id);
     }
 }
